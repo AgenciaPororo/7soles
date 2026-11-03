@@ -9,23 +9,37 @@ const db = firebase.database();
 
 let dbProducts = [];
 
-// Lista inicial de respaldo completa con todas las categorías y productos de la carta
+// Orden estricto requerido para el catálogo administrativo y navegación
+const categoryHeaders = {
+    'pizzas': { title: 'Pizzas' },
+    'empanadas': { title: 'Empanadas' },
+    'tartas': { title: 'Tartas' },
+    'sandwichs': { title: 'Sándwiches clásicos' },
+    'sandwichs-esp': { title: 'Sándwiches especiales' },
+    'gratinados': { title: 'Gratinados' },
+    'milanesas': { title: 'Milanesas' },
+    'pastas': { title: 'Pastas caseras' },
+    'lomo': { title: 'Platos de lomo' },
+    'pollo': { title: 'Platos de pollo' },
+    'papas': { title: 'Papas' },
+    'tortillas': { title: 'Tortillas' },
+    'omelette': { title: 'Omelette' },
+    'ensaladas': { title: 'Ensaladas' },
+    'bebidas': { title: 'Bebidas y postres' }
+};
+
+// Lista inicial de respaldo completa con ensaladas incluidas
 const initialProductsSeed = [
     // PIZZAS
     { id: "p1", categoria: "pizzas", nombre: "Muzzarella", precio: 4500, precio_secundario: 8000, disponible: "TRUE" },
     { id: "p2", categoria: "pizzas", nombre: "Especial", precio: 5000, precio_secundario: 9000, disponible: "TRUE" },
-    { id: "p3", categoria: "pizzas", nombre: "Fugazzeta", precio: 4800, precio_secundario: 8500, disponible: "TRUE" },
-    { id: "p4", categoria: "pizzas", nombre: "Napolitana", precio: 5200, precio_secundario: 9500, disponible: "TRUE" },
 
     // EMPANADAS
     { id: "e1", categoria: "empanadas", nombre: "Carne", precio: 2500, precio_secundario: 27000, disponible: "TRUE" },
     { id: "e2", categoria: "empanadas", nombre: "Jamón y Queso", precio: 2500, precio_secundario: 27000, disponible: "TRUE" },
-    { id: "e3", categoria: "empanadas", nombre: "Pollo", precio: 2500, precio_secundario: 27000, disponible: "TRUE" },
-    { id: "e4", categoria: "empanadas", nombre: "Humita", precio: 2500, precio_secundario: 27000, disponible: "TRUE" },
 
     // TARTAS
     { id: "t1", categoria: "tartas", nombre: "Verdura", precio: 3000, precio_secundario: 5500, disponible: "TRUE" },
-    { id: "t2", categoria: "tartas", nombre: "Jamón y Queso", precio: 3200, precio_secundario: 6000, disponible: "TRUE" },
 
     // SÁNDWICHES CLÁSICOS
     { id: "s1", categoria: "sandwichs", nombre: "Sándwich de Miga", precio: 2200, disponible: "TRUE" },
@@ -33,42 +47,41 @@ const initialProductsSeed = [
 
     // SÁNDWICHES ESPECIALES
     { id: "se1", categoria: "sandwichs-esp", nombre: "Hamburguesa Completa", precio: 6500, disponible: "TRUE" },
-    { id: "se2", categoria: "sandwichs-esp", nombre: "Sándwich de Milanesa", precio: 7500, disponible: "TRUE" },
 
     // GRATINADOS
     { id: "g1", categoria: "gratinados", nombre: "Gratinado de Jamón y Queso", precio: 7000, disponible: "TRUE" },
 
-    // MILANESAS (precio: Pollo, precio_secundario: Ternera)
+    // MILANESAS (precio: Pollo, precio_secundario: Carne)
     { id: "m1", categoria: "milanesas", nombre: "Milanesa Completa", precio: 8500, precio_secundario: 9500, disponible: "TRUE" },
-    { id: "m2", categoria: "milanesas", nombre: "Milanesa a la Napolitana", precio: 9500, precio_secundario: 10500, disponible: "TRUE" },
+    { id: "m2", categoria: "milanesas", nombre: "Milanesa Napolitana", precio: 9500, precio_secundario: 10500, disponible: "TRUE" },
 
     // PASTAS
     { id: "pas1", categoria: "pastas", nombre: "Tallarines", precio: 6000, disponible: "TRUE" },
-    { id: "pas2", categoria: "pastas", nombre: "Ravioles", precio: 6800, disponible: "TRUE" },
 
     // PLATOS DE LOMO
     { id: "l1", categoria: "lomo", nombre: "Grillado a la Plancha", precio: 12500, disponible: "TRUE" },
-    { id: "l2", categoria: "lomo", nombre: "A la Crema", precio: 15900, disponible: "TRUE" },
 
     // PLATOS DE POLLO
     { id: "po1", categoria: "pollo", nombre: "Grillado a la Plancha", precio: 11000, disponible: "TRUE" },
-    { id: "po2", categoria: "pollo", nombre: "A la Crema", precio: 14900, disponible: "TRUE" },
 
     // PAPAS
     { id: "pap1", categoria: "papas", nombre: "Papas Fritas Chicas", precio: 7000, disponible: "TRUE" },
-    { id: "pap2", categoria: "papas", nombre: "Papas Fritas Grandes", precio: 8000, disponible: "TRUE" },
+
+    // TORTILLAS
+    { id: "tor1", categoria: "tortillas", nombre: "Tortilla de Papas Chica", precio: 7000, disponible: "TRUE" },
+
+    // OMELETTE
+    { id: "ome1", categoria: "omelette", nombre: "Omelette Tradicional", precio: 7000, disponible: "TRUE" },
 
     // ENSALADAS
-    { id: "ens1", categoria: "ensaladas", nombre: "Ensalada Chica (hasta 3 gustos)", precio: 4000, disponible: "TRUE" },
-    { id: "ens2", categoria: "ensaladas", nombre: "Ensalada Grande (hasta 5 gustos)", precio: 4900, disponible: "TRUE" },
-    { id: "ens3", categoria: "ensaladas", nombre: "Ensalada Especial Chica (4 gustos)", precio: 5000, disponible: "TRUE" },
-    { id: "ens4", categoria: "ensaladas", nombre: "Ensalada Especial Grande (5 gustos)", precio: 6500, disponible: "TRUE" },
+    { id: "ens1", categoria: "ensaladas", nombre: "Ensalada Chica", precio: 4000, disponible: "TRUE" },
+    { id: "ens2", categoria: "ensaladas", nombre: "Ensalada Grande", precio: 4900, disponible: "TRUE" },
+    { id: "ens3", categoria: "ensaladas", nombre: "Ensalada Chica Especial", precio: 5000, disponible: "TRUE" },
+    { id: "ens4", categoria: "ensaladas", nombre: "Ensalada Grande Especial", precio: 6500, disponible: "TRUE" },
 
     // BEBIDAS & POSTRES
     { id: "b1", categoria: "bebidas", subtipo: "bebida", nombre: "Gaseosa 1.5L", precio: 3500, disponible: "TRUE" },
-    { id: "b2", categoria: "bebidas", subtipo: "bebida", nombre: "Gaseosa 500ml", precio: 2200, disponible: "TRUE" },
-    { id: "b3", categoria: "bebidas", subtipo: "bebida", nombre: "Agua Mineral", precio: 2000, disponible: "TRUE" },
-    { id: "b4", categoria: "bebidas", subtipo: "postre", nombre: "Flan Casero", precio: 2500, disponible: "TRUE" }
+    { id: "b2", categoria: "bebidas", subtipo: "postre", nombre: "Flan Casero", precio: 2500, disponible: "TRUE" }
 ];
 
 let menuDiario = {
@@ -80,51 +93,43 @@ let menuDiario = {
 let configOtros = {
     deliveryCost: 1500,
     cbu: '0070108830004157511274',
-    alias: 'sietesolesraul'
+    alias: 'sietesolesraul',
+    ensChica: 4000,
+    ensGrande: 4900,
+    ensEspChica: 5000,
+    ensEspGrande: 6500
 };
 
 let selectedMenuDiarioOption = 'opt1';
 
 let isMenuDiarioChanged = false;
 let isOtrosChanged = false;
+let isEnsaladasChanged = false;
 let isProductsPanelChanged = false;
 let pendingCloseAction = null;
 let pendingDeleteIndex = null;
-
-const categoryHeaders = {
-    'pizzas': { title: 'Pizzas' },
-    'empanadas': { title: 'Empanadas' },
-    'tartas': { title: 'Tartas' },
-    'sandwichs': { title: 'Sándwiches Clásicos' },
-    'sandwichs-esp': { title: 'Sándwiches Especiales' },
-    'gratinados': { title: 'Gratinados' },
-    'milanesas': { title: 'Milanesas' },
-    'pastas': { title: 'Pastas Caseras' },
-    'lomo': { title: 'Platos de Lomo' },
-    'pollo': { title: 'Platos de Pollo' },
-    'papas': { title: 'Papas, Tortillas & Omelettes' },
-    'ensaladas': { title: 'Ensaladas' },
-    'bebidas': { title: 'Bebidas & Postres' }
-};
 
 const defaultImages = {
     'pizzas': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS9ZNVFLDhCCq16vmXQqERkmn827qJGAjgtMzVfK-CYjw&s=10',
     'empanadas': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRk4Ev4Q5IwuYlwhO0ghjG4t9WF9CpVxCkG1CBUrNpBIQ&s=10',
     'tartas': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqoP0IL6wVRQC9hkFMHyCvuoH5hvCMB2fW9GdJ5MzBhA&s=10',
     'sandwichs': 'https://images.unsplash.com/photo-1509722747041-616f39b57569?auto=format&fit=crop&w=1000&q=80',
-    'gratinados': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=1000&q=80',
     'sandwichs-esp': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=80',
+    'gratinados': 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=1000&q=80',
     'milanesas': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTILeBZQoubn5fXEYg-Z9dRAoBvvb6pDZ9O5j1FOsb1Dg&s=10',
     'pastas': 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=1000&q=80',
     'lomo': 'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1000&q=80',
     'pollo': 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=1000&q=80',
     'papas': 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=1000&q=80',
+    'tortillas': 'https://images.unsplash.com/photo-1613564834361-9436948817d1?auto=format&fit=crop&w=1000&q=80',
+    'omelette': 'https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=1000&q=80',
     'ensaladas': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1000&q=80',
     'bebidas': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?auto=format&fit=crop&w=1000&q=80'
 };
 
-const baseIngredients = ["Lechuga", "Tomate", "Huevo", "Cebolla", "Zanahoria"];
-const extraIngredients = ["Pollo", "Choclo", "Palmitos", "Jamón", "Queso", "Ananá"];
+// Ingredientes para las ensaladas según requerimientos
+const baseIngredients = ["Lechuga", "Tomate", "Cebolla", "Huevo", "Zanahoria"];
+const extraIngredients = ["Pollo", "Choclo", "Jamón", "Queso", "Ananá", "Palmitos"];
 const saladLimits = { 'chica': 3, 'grande': 5, 'esp-chica': 4, 'esp-grande': 5 };
 
 let cart = [];
@@ -192,12 +197,17 @@ function listenToConfigOtros() {
             configOtros = {
                 deliveryCost: parseInt(data.deliveryCost) || 1500,
                 cbu: data.cbu || '0070108830004157511274',
-                alias: data.alias || 'sietesolesraul'
+                alias: data.alias || 'sietesolesraul',
+                ensChica: parseInt(data.ensChica) || 4000,
+                ensGrande: parseInt(data.ensGrande) || 4900,
+                ensEspChica: parseInt(data.ensEspChica) || 5000,
+                ensEspGrande: parseInt(data.ensEspGrande) || 6500
             };
         } else {
             db.ref("ConfigOtros").set(configOtros);
         }
         updateUIWithConfigOtros();
+        renderMenu();
     });
 }
 
@@ -313,16 +323,15 @@ function parseProductsData() {
         id: p.id, name: p.nombre, price: parseInt(p.precio) || 0
     }));
 
-    const allPapasCategory = activeProducts.filter(p => p.categoria === 'papas');
-    papasOptions = allPapasCategory.filter(p => !p.nombre.toLowerCase().includes('tortilla') && !p.nombre.toLowerCase().includes('omelette')).map(p => ({
+    papasOptions = activeProducts.filter(p => p.categoria === 'papas').map(p => ({
         id: p.id, name: p.nombre, price: parseInt(p.precio) || 0
     }));
 
-    tortillasList = allPapasCategory.filter(p => p.nombre.toLowerCase().includes('tortilla')).map(p => ({
+    tortillasList = activeProducts.filter(p => p.categoria === 'tortillas').map(p => ({
         id: p.id, name: p.nombre, price: parseInt(p.precio) || 0
     }));
 
-    omelettesList = allPapasCategory.filter(p => p.nombre.toLowerCase().includes('omelette')).map(p => ({
+    omelettesList = activeProducts.filter(p => p.categoria === 'omelette').map(p => ({
         id: p.id, name: p.nombre, price: parseInt(p.precio) || 0
     }));
 }
@@ -431,12 +440,60 @@ function saveAdminMenuDiario() {
     });
 }
 
+function openAdminEnsaladasPanel() {
+    closeAdminSelectorModal();
+    document.getElementById('admin-ens-chica').value = configOtros.ensChica || 4000;
+    document.getElementById('admin-ens-grande').value = configOtros.ensGrande || 4900;
+    document.getElementById('admin-ens-esp-chica').value = configOtros.ensEspChica || 5000;
+    document.getElementById('admin-ens-esp-grande').value = configOtros.ensEspGrande || 6500;
+
+    isEnsaladasChanged = false;
+    document.getElementById('admin-ensaladas-modal').classList.add('open');
+}
+
+function markEnsaladasChanged() { isEnsaladasChanged = true; }
+
+function cancelAdminEnsaladasModal() {
+    forceCloseAdminEnsaladasModal();
+    openAdminSelectorModal();
+}
+
+function forceCloseAdminEnsaladasModal() {
+    document.getElementById('admin-ensaladas-modal').classList.remove('open');
+    isEnsaladasChanged = false;
+}
+
+function saveAdminEnsaladas() {
+    const ensChica = parseInt(document.getElementById('admin-ens-chica').value) || 0;
+    const ensGrande = parseInt(document.getElementById('admin-ens-grande').value) || 0;
+    const ensEspChica = parseInt(document.getElementById('admin-ens-esp-chica').value) || 0;
+    const ensEspGrande = parseInt(document.getElementById('admin-ens-esp-grande').value) || 0;
+
+    if (isNaN(ensChica) || isNaN(ensGrande) || isNaN(ensEspChica) || isNaN(ensEspGrande)) {
+        alert('Por favor ingresá precios válidos para las ensaladas.');
+        return;
+    }
+
+    const updated = {
+        ...configOtros,
+        ensChica,
+        ensGrande,
+        ensEspChica,
+        ensEspGrande
+    };
+
+    db.ref("ConfigOtros").set(updated).then(() => {
+        forceCloseAdminEnsaladasModal();
+        showToast("Precios de ensaladas guardados correctamente");
+    });
+}
+
 function openAdminOtrosPanel() {
     closeAdminSelectorModal();
     document.getElementById('admin-delivery-cost').value = configOtros.deliveryCost || 1500;
     document.getElementById('admin-bank-cbu').value = configOtros.cbu || '';
     document.getElementById('admin-bank-alias').value = configOtros.alias || '';
-    
+
     isOtrosChanged = false;
     document.getElementById('admin-otros-modal').classList.add('open');
 }
@@ -463,10 +520,16 @@ function saveAdminOtros() {
         return;
     }
 
-    const updated = { deliveryCost: cost, cbu, alias };
+    const updated = { 
+        ...configOtros,
+        deliveryCost: cost, 
+        cbu, 
+        alias
+    };
+
     db.ref("ConfigOtros").set(updated).then(() => {
         forceCloseAdminOtrosModal();
-        showToast("Datos guardados correctamente");
+        showToast("Datos generales guardados correctamente");
     });
 }
 
@@ -595,12 +658,24 @@ function openAdminPanel() {
     document.getElementById('admin-panel-modal').classList.add('open');
 }
 
+// Renderizado del Catálogo de Productos Ordenado Estrictamente según Requerimientos
 function renderAdminProductsList(filterText = '') {
     const container = document.getElementById('admin-products-list');
     container.innerHTML = '';
     const query = filterText.toLowerCase().trim();
 
-    dbProducts.forEach((prod, index) => {
+    const orderedCategories = Object.keys(categoryHeaders);
+    
+    const sortedProducts = [...dbProducts].sort((a, b) => {
+        let indexA = orderedCategories.indexOf(a.categoria);
+        let indexB = orderedCategories.indexOf(b.categoria);
+        if (indexA === -1) indexA = 999;
+        if (indexB === -1) indexB = 999;
+        return indexA - indexB;
+    });
+
+    sortedProducts.forEach((prod) => {
+        const index = dbProducts.findIndex(p => p.id === prod.id);
         const catTitle = categoryHeaders[prod.categoria]?.title || prod.categoria;
         if (query && !prod.nombre.toLowerCase().includes(query) && !catTitle.toLowerCase().includes(query)) return;
 
@@ -640,7 +715,7 @@ function renderAdminProductsList(filterText = '') {
                         <input type="number" id="admin-price-${index}" value="${prod.precio}" oninput="isProductsPanelChanged = true">
                     </div>
                     <div>
-                        <label style="font-size:0.65rem; color:var(--text-muted); display:block;">Precio Ternera ($)</label>
+                        <label style="font-size:0.65rem; color:var(--text-muted); display:block;">Precio Carne ($)</label>
                         <input type="number" id="admin-price-sec-${index}" value="${prod.precio_secundario || prod.precio || 0}" oninput="isProductsPanelChanged = true">
                     </div>
                 </div>
@@ -861,6 +936,7 @@ function filterCategory(catKey, element) {
 
 function renderMenu() {
     const container = document.getElementById('menu-container');
+    if (!container) return;
     container.innerHTML = '';
 
     Object.keys(categoryHeaders).forEach(catKey => {
@@ -892,7 +968,9 @@ function renderMenu() {
         else if (catKey === 'pastas' && pastasList.length > 0) renderPastasCard(gridContainer);
         else if (catKey === 'lomo' && lomoList.length > 0) renderLomoCards(gridContainer);
         else if (catKey === 'pollo' && polloList.length > 0) renderPolloCards(gridContainer);
-        else if (catKey === 'papas') renderPapasYMasCards(gridContainer);
+        else if (catKey === 'papas') renderPapasCards(gridContainer);
+        else if (catKey === 'tortillas') renderTortillasCards(gridContainer);
+        else if (catKey === 'omelette') renderOmeletteCards(gridContainer);
         else if (catKey === 'ensaladas') renderEnsaladasCard(gridContainer);
         else if (catKey === 'bebidas') renderBebidasCards(gridContainer);
     });
@@ -1268,7 +1346,7 @@ function renderMilanesasCard(container) {
                     <label class="step-label">2. Carne:</label>
                     <select id="mila-carne-type" onchange="updateMilanesaPriceDisplay()">
                         <option value="Pollo">Pollo</option>
-                        <option value="Carne">Carne de Ternera</option>
+                        <option value="Carne">Carne</option>
                     </select>
                 </div>
                 <div class="option-field" style="margin-top: 8px;">
@@ -1461,74 +1539,24 @@ function addPolloToCart(btn) {
     addToCart({ id: `pollo-${item.id}`, name: `Pollo ${item.name}`, price: item.price }, btn);
 }
 
-function renderPapasYMasCards(container) {
-    const papasRender = papasOptions.length > 0 ? papasOptions : [
-        { id: "pap1", name: "Papas Fritas Chicas", price: 7000 },
-        { id: "pap2", name: "Papas Fritas Grandes", price: 8000 }
-    ];
-
-    const tortillasRender = tortillasList.length > 0 ? tortillasList : [
-        { id: "pap3", name: "Tortilla de Papas Chica", price: 7000 },
-        { id: "pap4", name: "Tortilla de Papas Grande", price: 8000 }
-    ];
-
-    const omelettesRender = omelettesList.length > 0 ? omelettesList : [
-        { id: "pap5", name: "Omelette Tradicional", price: 7000 },
-        { id: "pap6", name: "Omelette de Pollo", price: 8000 }
-    ];
-
+function renderPapasCards(container) {
+    const list = papasOptions.length > 0 ? papasOptions : [{ id: "pap1", name: "Papas Fritas Chicas", price: 7000 }];
     container.innerHTML = `
         <div class="product-card">
             <div class="step-wrapper">
                 <div class="option-field">
-                    <label class="step-label">Papas o Puré:</label>
+                    <label class="step-label">Opción de Papas:</label>
                     <select id="papas-option" onchange="updatePapasPrice()">
-                        ${papasRender.map((p, idx) => `<option value="${idx}">${p.name} - $${p.price.toLocaleString('es-AR')}</option>`).join('')}
+                        ${list.map((p, idx) => `<option value="${idx}">${p.name} - $${p.price.toLocaleString('es-AR')}</option>`).join('')}
                     </select>
                 </div>
             </div>
             <div class="product-bottom">
                 <div class="price-box">
                     <span class="price-label">Precio</span>
-                    <span class="price" id="papas-price-display">$${papasRender[0].price.toLocaleString('es-AR')}</span>
+                    <span class="price" id="papas-price-display">$${list[0].price.toLocaleString('es-AR')}</span>
                 </div>
                 <button class="btn-add" onclick="addPapasToCart(this)">Agregar</button>
-            </div>
-        </div>
-
-        <div class="product-card">
-            <div class="step-wrapper">
-                <div class="option-field">
-                    <label class="step-label">Tortilla de Papas:</label>
-                    <select id="tortilla-size" onchange="updateTortillaPrice()">
-                        ${tortillasRender.map((t, idx) => `<option value="${idx}">${t.name} - $${t.price.toLocaleString('es-AR')}</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-            <div class="product-bottom">
-                <div class="price-box">
-                    <span class="price-label">Precio</span>
-                    <span class="price" id="tortilla-price-display">$${tortillasRender[0].price.toLocaleString('es-AR')}</span>
-                </div>
-                <button class="btn-add" onclick="addTortillaToCart(this)">Agregar</button>
-            </div>
-        </div>
-
-        <div class="product-card">
-            <div class="step-wrapper">
-                <div class="option-field">
-                    <label class="step-label">Omelette:</label>
-                    <select id="omelette-type" onchange="updateOmelettePrice()">
-                        ${omelettesRender.map((o, idx) => `<option value="${idx}">${o.name} - $${o.price.toLocaleString('es-AR')}</option>`).join('')}
-                    </select>
-                </div>
-            </div>
-            <div class="product-bottom">
-                <div class="price-box">
-                    <span class="price-label">Precio</span>
-                    <span class="price" id="omelette-price-display">$${omelettesRender[0].price.toLocaleString('es-AR')}</span>
-                </div>
-                <button class="btn-add" onclick="addOmeletteToCart(this)">Agregar</button>
             </div>
         </div>
     `;
@@ -1546,6 +1574,29 @@ function addPapasToCart(btn) {
     if (item) addToCart({ id: `papas-${item.id}`, name: item.name, price: item.price }, btn);
 }
 
+function renderTortillasCards(container) {
+    const list = tortillasList.length > 0 ? tortillasList : [{ id: "tor1", name: "Tortilla de Papas Chica", price: 7000 }];
+    container.innerHTML = `
+        <div class="product-card">
+            <div class="step-wrapper">
+                <div class="option-field">
+                    <label class="step-label">Opción de Tortilla:</label>
+                    <select id="tortilla-size" onchange="updateTortillaPrice()">
+                        ${list.map((t, idx) => `<option value="${idx}">${t.name} - $${t.price.toLocaleString('es-AR')}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+            <div class="product-bottom">
+                <div class="price-box">
+                    <span class="price-label">Precio</span>
+                    <span class="price" id="tortilla-price-display">$${list[0].price.toLocaleString('es-AR')}</span>
+                </div>
+                <button class="btn-add" onclick="addTortillaToCart(this)">Agregar</button>
+            </div>
+        </div>
+    `;
+}
+
 function updateTortillaPrice() {
     const idx = document.getElementById('tortilla-size').value;
     const item = tortillasList[idx];
@@ -1556,6 +1607,29 @@ function addTortillaToCart(btn) {
     const idx = document.getElementById('tortilla-size').value;
     const item = tortillasList[idx];
     if (item) addToCart({ id: `tortilla-${item.id}`, name: item.name, price: item.price }, btn);
+}
+
+function renderOmeletteCards(container) {
+    const list = omelettesList.length > 0 ? omelettesList : [{ id: "ome1", name: "Omelette Tradicional", price: 7000 }];
+    container.innerHTML = `
+        <div class="product-card">
+            <div class="step-wrapper">
+                <div class="option-field">
+                    <label class="step-label">Opción de Omelette:</label>
+                    <select id="omelette-type" onchange="updateOmelettePrice()">
+                        ${list.map((o, idx) => `<option value="${idx}">${o.name} - $${o.price.toLocaleString('es-AR')}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+            <div class="product-bottom">
+                <div class="price-box">
+                    <span class="price-label">Precio</span>
+                    <span class="price" id="omelette-price-display">$${list[0].price.toLocaleString('es-AR')}</span>
+                </div>
+                <button class="btn-add" onclick="addOmeletteToCart(this)">Agregar</button>
+            </div>
+        </div>
+    `;
 }
 
 function updateOmelettePrice() {
@@ -1570,40 +1644,34 @@ function addOmeletteToCart(btn) {
     if (item) addToCart({ id: `omelette-${item.id}`, name: item.name, price: item.price }, btn);
 }
 
+// Renderizado de Ensaladas vinculado a ConfigOtros
 function renderEnsaladasCard(container) {
-    const activeProducts = dbProducts.filter(p => p.categoria === 'ensaladas' && String(p.disponible).toUpperCase() === 'TRUE');
-    
-    if (activeProducts.length === 0) {
-        container.innerHTML = `<p style="padding:15px; color:var(--text-muted);">No hay ensaladas disponibles actualmente.</p>`;
-        return;
-    }
-
-    const priceChica = activeProducts.find(p => p.nombre.toLowerCase().includes('ensalada chica'))?.precio || 4000;
-    const priceGrande = activeProducts.find(p => p.nombre.toLowerCase().includes('ensalada grande'))?.precio || 4900;
-    const priceEspChica = activeProducts.find(p => p.nombre.toLowerCase().includes('especial chica'))?.precio || 5000;
-    const priceEspGrande = activeProducts.find(p => p.nombre.toLowerCase().includes('especial grande'))?.precio || 6500;
+    const priceChica = configOtros.ensChica;
+    const priceGrande = configOtros.ensGrande;
+    const priceEspChica = configOtros.ensEspChica;
+    const priceEspGrande = configOtros.ensEspGrande;
 
     container.innerHTML = `
         <div class="product-card">
             <div class="step-wrapper">
-                <span class="step-label">1. Tamaño de Ensalada:</span>
+                <span class="step-label">1. Elegir Tamaño:</span>
                 <div class="variant-pills">
-                    <button class="variant-btn selected" onclick="selectSaladType('chica', ${priceChica}, this)">Chica (hasta 3) - $${parseInt(priceChica).toLocaleString('es-AR')}</button>
-                    <button class="variant-btn" onclick="selectSaladType('grande', ${priceGrande}, this)">Grande (hasta 5) - $${parseInt(priceGrande).toLocaleString('es-AR')}</button>
-                    <button class="variant-btn" onclick="selectSaladType('esp-chica', ${priceEspChica}, this)">Esp. Chica 4 gustos - $${parseInt(priceEspChica).toLocaleString('es-AR')}</button>
-                    <button class="variant-btn" onclick="selectSaladType('esp-grande', ${priceEspGrande}, this)">Esp. Grande 5 gustos - $${parseInt(priceEspGrande).toLocaleString('es-AR')}</button>
+                    <button class="variant-btn selected" onclick="selectSaladType('chica', ${priceChica}, this)">Chica (hasta 3 ing.) - $${priceChica.toLocaleString('es-AR')}</button>
+                    <button class="variant-btn" onclick="selectSaladType('grande', ${priceGrande}, this)">Grande (hasta 5 ing.) - $${priceGrande.toLocaleString('es-AR')}</button>
+                    <button class="variant-btn" onclick="selectSaladType('esp-chica', ${priceEspChica}, this)">Especial chica (4 ing.) - $${priceEspChica.toLocaleString('es-AR')}</button>
+                    <button class="variant-btn" onclick="selectSaladType('esp-grande', ${priceEspGrande}, this)">Especial grande (hasta 5 ing.) - $${priceEspGrande.toLocaleString('es-AR')}</button>
                 </div>
             </div>
 
             <div class="step-wrapper">
-                <span class="step-label">2. Ingredientes Clásicos:</span>
+                <span class="step-label">2. Ingredientes Normales:</span>
                 <div class="flavor-grid">
                     ${baseIngredients.map(ing => `
                         <button class="flavor-bubble" onclick="toggleSaladIngredient('${ing}', false, this)">${ing}</button>
                     `).join('')}
                 </div>
 
-                <span class="step-label" style="margin-top: 10px; display: block;">Ingredientes Especiales:</span>
+                <span class="step-label" style="margin-top: 12px; display: block;">Ingredientes Especiales:</span>
                 <div class="flavor-grid" id="salad-extra-grid">
                     ${extraIngredients.map(ing => `
                         <button class="flavor-bubble disabled-bubble" onclick="toggleSaladIngredient('${ing}', true, this)">${ing}</button>
@@ -1614,7 +1682,7 @@ function renderEnsaladasCard(container) {
             <div class="product-bottom">
                 <div class="price-box">
                     <span class="price-label">Precio</span>
-                    <span class="price" id="salad-price-display">$${parseInt(priceChica).toLocaleString('es-AR')}</span>
+                    <span class="price" id="salad-price-display">$${priceChica.toLocaleString('es-AR')}</span>
                 </div>
                 <button class="btn-add" onclick="validateAndAddSalad(this)">Agregar</button>
             </div>
@@ -1681,14 +1749,13 @@ function updateSaladBubblesState() {
 
 function validateAndAddSalad(btn) {
     const maxAllowed = saladLimits[selectedSaladType] || 3;
-    const activeProducts = dbProducts.filter(p => p.categoria === 'ensaladas' && String(p.disponible).toUpperCase() === 'TRUE');
 
-    const priceChica = activeProducts.find(p => p.nombre.toLowerCase().includes('ensalada chica'))?.precio || 4000;
-    const priceGrande = activeProducts.find(p => p.nombre.toLowerCase().includes('ensalada grande'))?.precio || 4900;
-    const priceEspChica = activeProducts.find(p => p.nombre.toLowerCase().includes('especial chica'))?.precio || 5000;
-    const priceEspGrande = activeProducts.find(p => p.nombre.toLowerCase().includes('especial grande'))?.precio || 6500;
-
-    const priceMap = { 'chica': parseInt(priceChica), 'grande': parseInt(priceGrande), 'esp-chica': parseInt(priceEspChica), 'esp-grande': parseInt(priceEspGrande) };
+    const priceMap = { 
+        'chica': configOtros.ensChica, 
+        'grande': configOtros.ensGrande, 
+        'esp-chica': configOtros.ensEspChica, 
+        'esp-grande': configOtros.ensEspGrande 
+    };
     const price = priceMap[selectedSaladType];
 
     const typeNames = {
@@ -1711,8 +1778,9 @@ function validateAndAddSalad(btn) {
     };
 
     if (totalSelected.length < maxAllowed) {
+        const missing = maxAllowed - totalSelected.length;
         pendingSaladItem = itemObj;
-        document.getElementById('salad-modal-text').innerText = `Elegiste ${totalSelected.length} de ${maxAllowed} ingredientes permitidos. ¿Agregar de todas formas?`;
+        document.getElementById('salad-modal-text').innerText = `Te faltan seleccionar ${missing} ingrediente${missing > 1 ? 's' : ''} para completar el máximo permitido (${maxAllowed}). ¿Deseás agregarla así o volver y agregar más ingredientes?`;
 
         document.getElementById('btn-force-salad').onclick = () => {
             addToCart(pendingSaladItem, btn);

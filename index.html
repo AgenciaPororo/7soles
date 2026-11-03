@@ -115,16 +115,55 @@
             <p>Seleccioná la sección a gestionar:</p>
             <div class="modal-actions-vertical" style="margin-bottom: 12px;">
                 <button class="btn-primary-option" onclick="openAdminProductsPanel()">
-                    <i class="fa-solid fa-boxes-stacked"></i> Catálogo de Productos (incluye Ensaladas)
+                    <i class="fa-solid fa-boxes-stacked"></i>  Catálogo de Productos
+                </button>
+                <button class="btn-primary-option" onclick="openAdminEnsaladasPanel()">
+                    <i class="fa-solid fa-carrot"></i>  Editar Ensaladas
                 </button>
                 <button class="btn-primary-option" onclick="openAdminMenuDiarioPanel()">
-                    <i class="fa-solid fa-utensils"></i> Editar Menú del Día
+                    <i class="fa-solid fa-utensils"></i>    Editar Menú del Día
                 </button>
                 <button class="btn-primary-option" onclick="openAdminOtrosPanel()">
-                    <i class="fa-solid fa-sliders"></i> Datos (Envío y Datos Bancarios)
+                    <i class="fa-solid fa-sliders"></i>  Datos (Envío y Bancarios)
                 </button>
             </div>
             <button class="btn-secondary" onclick="closeAdminSelectorModal()">Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Modal Panel "Editar Ensaladas" -->
+    <div class="custom-modal" id="admin-ensaladas-modal">
+        <div class="custom-modal-box">
+            <div class="admin-header">
+                <h3> Precios de Ensaladas</h3>
+                <button class="close-btn" onclick="cancelAdminEnsaladasModal()">×</button>
+            </div>
+            
+            <div style="margin-top: 10px; text-align: left;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem;">Ensalada Chica ($):</label>
+                        <input type="number" id="admin-ens-chica" placeholder="Ej: 4000" oninput="markEnsaladasChanged()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem;">Ensalada Grande ($):</label>
+                        <input type="number" id="admin-ens-grande" placeholder="Ej: 4900" oninput="markEnsaladasChanged()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem;">Especial Chica ($):</label>
+                        <input type="number" id="admin-ens-esp-chica" placeholder="Ej: 5000" oninput="markEnsaladasChanged()">
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size: 0.75rem;">Especial Grande ($):</label>
+                        <input type="number" id="admin-ens-esp-grande" placeholder="Ej: 6500" oninput="markEnsaladasChanged()">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="margin-top: 15px;">
+                <button class="btn-secondary" onclick="cancelAdminEnsaladasModal()">Cancelar</button>
+                <button class="btn-primary" onclick="saveAdminEnsaladas()"><i class="fa-solid fa-floppy-disk"></i> Guardar y salir</button>
+            </div>
         </div>
     </div>
 
@@ -132,9 +171,10 @@
     <div class="custom-modal" id="admin-otros-modal">
         <div class="custom-modal-box">
             <div class="admin-header">
-                <h3>Datos y Configuración General</h3>
+                <h3> Datos y Configuración General</h3>
                 <button class="close-btn" onclick="cancelAdminOtrosModal()">×</button>
             </div>
+            
             <div class="form-group" style="margin-top: 10px;">
                 <label>Costo del Delivery ($):</label>
                 <input type="number" id="admin-delivery-cost" placeholder="Ej: 1500" oninput="markOtrosChanged()">
@@ -147,6 +187,7 @@
                 <label>Alias Bancario:</label>
                 <input type="text" id="admin-bank-alias" placeholder="Ej: sietesolesraul" oninput="markOtrosChanged()">
             </div>
+
             <div class="modal-actions" style="margin-top: 15px;">
                 <button class="btn-secondary" onclick="cancelAdminOtrosModal()">Cancelar</button>
                 <button class="btn-primary" onclick="saveAdminOtros()"><i class="fa-solid fa-floppy-disk"></i> Guardar y salir</button>
@@ -267,7 +308,7 @@
     <div class="custom-modal" id="admin-panel-modal">
         <div class="custom-modal-box admin-modal-box">
             <div class="admin-header">
-                <h3>Catálogo de Productos</h3>
+                <h3>  Catálogo de Productos</h3>
                 <button class="close-btn" onclick="cancelAdminProductsModal()">×</button>
             </div>
             
@@ -304,10 +345,12 @@
                     <option value="sandwichs-esp">Sándwiches Especiales</option>
                     <option value="gratinados">Gratinados</option>
                     <option value="milanesas">Milanesas</option>
-                    <option value="pastas">Pastas</option>
-                    <option value="lomo">Lomo</option>
-                    <option value="pollo">Pollo</option>
-                    <option value="papas">Papas & Guarniciones</option>
+                    <option value="pastas">Pastas Caseras</option>
+                    <option value="lomo">Platos de Lomo</option>
+                    <option value="pollo">Platos de Pollo</option>
+                    <option value="papas">Papas</option>
+                    <option value="tortillas">Tortillas</option>
+                    <option value="omelette">Omelette</option>
                     <option value="ensaladas">Ensaladas</option>
                     <option value="bebidas">Bebidas & Postres</option>
                 </select>
@@ -351,8 +394,8 @@
                     <input type="number" id="new-prod-price-mila-pollo" placeholder="Precio Milanesa de Pollo">
                 </div>
                 <div class="form-group">
-                    <label>Precio Ternera ($):</label>
-                    <input type="number" id="new-prod-price-mila-ternera" placeholder="Precio Milanesa de Ternera">
+                    <label>Precio Carne / Ternera ($):</label>
+                    <input type="number" id="new-prod-price-mila-ternera" placeholder="Precio Milanesa de Carne">
                 </div>
             </div>
 
@@ -430,7 +473,7 @@
             <h3>Ingredientes Incompletos</h3>
             <p id="salad-modal-text"></p>
             <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeSaladModal()">Seguir eligiendo</button>
+                <button class="btn-secondary" onclick="closeSaladModal()">Volver y agregar más</button>
                 <button class="btn-primary" id="btn-force-salad">Agregar así</button>
             </div>
         </div>
